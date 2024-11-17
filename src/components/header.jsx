@@ -1,0 +1,96 @@
+import { Link, useSearchParams } from "react-router-dom";
+import { Button } from "./ui/button";
+import {
+  SignedIn,
+  SignedOut,
+  SignIn,
+  SignInButton,
+  UserButton,
+  useUser,
+} from "@clerk/clerk-react";
+import { useEffect, useState } from "react";
+import { BriefcaseBusiness } from "lucide-react";
+import { Heart } from "lucide-react";
+
+const Header = () => {
+  const [showSignIn, setShowSignIn] = useState(false);
+  const { user } = useUser();
+  const [search, setSearch] = useSearchParams();
+
+  useEffect(() => {
+    if (search.get("sign-in")) {
+      setShowSignIn(true);
+    }
+  }, [search]);
+
+  const handleOverlayClick = (e) => {
+    if (e.target === e.currentTarget) {
+      setShowSignIn(false);
+      setSearch({}); // reset search params
+    }
+  };
+
+  return (
+    <>
+      <nav className="py-4 flex justify-between items-center">
+        <Link to="/">
+          <img
+            src="/logo.png"
+            className="h-10 sm:h-13 md:h-16 lg:h-19"
+            alt="logo"
+          />
+        </Link>
+
+        <div className="flex gap-8">
+          <SignedOut>
+            <Button variant="outline" onClick={() => setShowSignIn(true)}>
+              Login
+            </Button>
+          </SignedOut>
+          <SignedIn>
+            {/* {user?.unsafeMetadata?.role === "recruiter" && (
+              <Link to="/post-job">
+                <Button className="rounded-full" variant="red">
+                  Create Job Listing
+                </Button>
+              </Link>
+            )} */}
+            <UserButton
+              appearance={{
+                elements: {
+                  avatarBox: "w-10 h-10",
+                },
+              }}
+            >
+              <UserButton.MenuItems>
+                <UserButton.Link
+                  label="My Jobs"
+                  labelIcon={<BriefcaseBusiness size={15} />}
+                  href="/my-jobs"
+                />
+                <UserButton.Link
+                  label="Saved Jobs"
+                  labelIcon={<Heart size={15} />}
+                  href="/saved-jobs"
+                />
+              </UserButton.MenuItems>
+            </UserButton>
+          </SignedIn>
+        </div>
+      </nav>
+
+      {showSignIn && (
+        <div
+          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+          onClick={handleOverlayClick}
+        >
+          <SignIn
+            signUpForceRedirectUrl="/onboarding"
+            fallbackRedirectUrl="/onboarding"
+          ></SignIn>
+        </div>
+      )}
+    </>
+  );
+};
+export default Header;
